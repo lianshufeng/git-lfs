@@ -1,10 +1,26 @@
-FROM ubuntu:22.04
+# 使用轻量级 Alpine 作为基础镜像
+FROM alpine:latest
 
-RUN apt-get update && apt-get install -y git curl bash unzip ca-certificates openssh-client \
-    && curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | bash \
-    && apt-get install -y git-lfs \
-    && git lfs install \
-    && rm -rf /var/lib/apt/lists/*
+# 避免交互式提示
+ENV DEBIAN_FRONTEND=noninteractive
 
+# 安装 git、bash、curl 和 ca-certificates（确保 HTTPS 能用）
+RUN apk update && apk add --no-cache \
+    git \
+    bash \
+    curl \
+    ca-certificates \
+    openssh-client \
+    unzip \
+    && rm -rf /var/cache/apk/*
+
+# 安装 Git LFS
+RUN curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.alpine.sh | sh && \
+    apk add --no-cache git-lfs && \
+    git lfs install
+
+# 设置工作目录
 WORKDIR /workspace
+
+# 默认启动 bash
 CMD ["bash"]
